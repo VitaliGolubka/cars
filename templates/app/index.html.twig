@@ -1,0 +1,173 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="flex w-full h-screen">
+        <div class="page-wrapper">
+            <div class="panel">
+                <h3 class="panel__title">FILTRER MA RECHERCHE</h3>
+                <form action="/" method="get" id="add-filter" class="panel__form">
+                    <input type="hidden" name="min-price" id="min-price">
+                    <input type="hidden" name="max-price" id="max-price">
+                    <input type="hidden" id="min-price-monthly">
+                    <input type="hidden" id="max-price-monthly">
+                    <input type="hidden" name="price-selected" id="price-selected" value="{{ priceSelected }}">
+                    <input type="hidden" name="sorting" id="sort" value="{{ sort }}">
+                    <input type="hidden" name="direction" id="direction" value="{{ direction }}">
+                    <div class="checkbox-div filter-partir">
+                        <div class="checkbox-title">Prêt à partir</div>
+                        <input type="checkbox" id="pret-a-partir" class="checkbox" checked>
+                        <label for="pret-a-partir" class="label"></label>
+                    </div>
+                    <div class="checkbox-div filter-km">
+                        <div class="checkbox-title">Zéro km</div>
+                        <input type="checkbox" id="zero-km" class="checkbox" checked>
+                        <label for="zero-km" class="label"></label>
+                    </div>
+                    <div class="checkbox-div filter-promotions unactive">
+                        <div class="checkbox-title">Promotions</div>
+                        <input type="checkbox" id="promotions" class="checkbox">
+                        <label for="promotions" class="label"></label>
+                    </div>
+                    <div class="filter-budget">
+                        <div class="filter-title">Budget</div>
+                        <div class="filter-budget-choice">
+                            <div class="filter-budget-choice-total">Total</div>
+                            <div class="filter-budget-choice-mensuel">Mensuel</div>
+                        </div>
+                        <div class="filter-budget-range">
+                            <div id="price-slider" data-min-price="{{ minPrice }}"
+                                 data-max-price="{{ maxPrice }}"
+                                 data-selected-min-price="{{ selectedMinPrice }}"
+                                 data-selected-max-price="{{ selectedMaxPrice }}"></div>
+                            <div id="price-monthly-slider" class="hidden" data-min-price="{{ minPriceMonthly }}"
+                                 data-max-price="{{ maxPriceMonthly }}"
+                                 data-selected-min-price="{{ selectedMinPriceMonthly }}"
+                                 data-selected-max-price="{{ selectedMaxPriceMonthly }}"></div>
+                        </div>
+                    </div>
+                    <div class="filter-choise">
+                        <div class="filter-title opened">Marque</div>
+                        <div class="filter-wrapper">
+                            {% for vehicle in brands %}
+                                <input type="checkbox" name="brands[]" class="radio" id="brand-{{ vehicle.brand }}"
+                                       value="{{ vehicle.brand }}" {{ (vehicle.brand in selectedBrands) ? 'checked' : '' }}/>
+                                <label for="brand-{{ vehicle.brand }}">{{ vehicle.brand }}</label> <br>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="filter-choise">
+                        <div class="filter-title" data-opened="{{ selectedEnergies|length ? 1 : 0 }}">Énergie</div>
+                        <div class="filter-wrapper">
+                            {% for vehicle in energies %}
+                                <input type="checkbox" name="energies[]" class="radio" id="energy-{{ vehicle.energy }}"
+                                       value="{{ vehicle.energy }}" {{ (vehicle.energy in selectedEnergies) ? 'checked' : '' }}/>
+                                <label for="energy-{{ vehicle.energy }}">{{ vehicle.energy }}</label> <br>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="filter-choise">
+                        <div class="filter-title" data-opened="{{ selectedModels|length ? 1 : 0 }}">Modèle</div>
+                        <div class="filter-wrapper">
+                            {% for vehicle in models %}
+                                <input type="checkbox" name="models[]" class="radio" id="model-{{ vehicle.model }}"
+                                       value="{{ vehicle.model }}" {{ (vehicle.model in selectedModels) ? 'checked' : '' }}/>
+                                <label for="model-{{ vehicle.model }}">{{ vehicle.model }}</label> <br>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="filter-choise">
+                        <div class="filter-title">Kilométrage</div>
+                    </div>
+                    <div class="filter-choise">
+                        <div class="filter-title">Année</div>
+                    </div>
+                    <div class="filter-choise">
+                        <div class="filter-title">Couleur</div>
+                    </div>
+                    <div class="filter-choise">
+                        <div class="filter-title">Motorisation</div>
+                    </div>
+                    <div class="filter-choise">
+                        <div class="filter-title">Équipement</div>
+                    </div>
+                    <div>
+                        <button type="submit" class="bg-sky-600 form-button">Show</button>
+                    </div>
+                </form>
+            </div>
+            <div class="view">
+                <div class="view__sort">
+                    <div class="view__sort-results"><span> {{ pagination.getTotalItemCount }}</span> résultats
+                        correspondant à votre
+                        recherche
+                    </div>
+                    <div class="view__sort-sort">
+                        <label for="sort">Trier par </label>
+                        <select name="sort" id="select-sort">
+                            <option id="sort-pertinence" value="id-desc">Pertinence</option>
+                            <option id="sort-price-asc" value="price-asc">Prix asc</option>
+                            <option id="sort-price-desc" value="price-desc">Prix desc</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="view__cars grid grid-cols-3 gap-10">
+                    {% for key,car in pagination %}
+                        {% if key == 4 %}
+                            <div class="car">
+                                <img width="384" alt="Скриншот 2022-03-29 в 16 21 58"
+                                     src="https://user-images.githubusercontent.com/34513693/160633732-4b9dbc32-656b-473d-86a5-4f0b26bae908.png"
+                                     style="max-width: 100%;">
+                            </div>
+                        {% endif %}
+                        <div class="car">
+
+                            <div class="car__picture"
+                                 style="background-image: url({{ car.pics[0] ?? '/image/clipart135547.png' }})"></div>
+                            <div class="car__info">
+                                <div class="car__info-left">
+                                    <div class="brand">{{ car.brand }}</div>
+                                    <div class="model">{{ car.model }}</div>
+                                    <div class="designation">{{ car.version }}</div>
+                                    <div class="year-fuel-hp">
+                                        <span class="year">{{ car.year }}</span> -
+                                        <span class="fuel">{{ car.energy }}</span> -
+                                        <span class="transmission">{{ car.gearbox }}</span> -
+                                        <span class="hp">{{ car.power }} hp</span>
+                                    </div>
+                                </div>
+                                <div class="car__info-right">
+                                    <div class="price-gross">{{ car.price ? "#{car.price} €" : '-' }}</div>
+                                    {% if car.priceRetail %}
+                                        <div class="flex justify-end">
+                                            <div class="price-official">
+                                                {{ car.priceRetail ? "#{car.priceRetail} €" : '' }}
+                                            </div>
+                                            <div class="price-discont">
+                                                {{ car.priceRetail ? "#{(((car.priceRetail - car.price) / car.priceRetail) * 100)|round} %" : '' }}
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <br/>
+                                    {% endif %}
+
+                                    <div class="per-month">
+                                        <span>Ou à partir de</span>
+                                        <div class="price-month">
+                                            {{ car.price ? "#{(car.price / (12*5))|round}€" : '-' }}
+                                        </div>
+                                        <span>/mois</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div>
+                    {{ knp_pagination_render(pagination) }}
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+{% endblock %}
