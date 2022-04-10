@@ -53,7 +53,7 @@ class DefaultController extends AbstractController
         if ($selectedMinPrice) {
             $selectedMinPrice = (int)$selectedMinPrice;
             $selectedMaxPrice = (int)$selectedMaxPrice;
-            $vehicleQueryBuilder->where('v.price BETWEEN :minPrice AND :maxPrice')
+            $vehicleQueryBuilder->andwhere('v.price BETWEEN :minPrice AND :maxPrice')
                 ->setParameter('minPrice', $selectedMinPrice)
                 ->setParameter('maxPrice', $selectedMaxPrice);
         } else {
@@ -68,7 +68,7 @@ class DefaultController extends AbstractController
         if ($selectedMinPriceMonthly) {
             $selectedMinPriceMonthly = (int)$selectedMinPriceMonthly;
             $selectedMaxPriceMonthly = (int)$selectedMaxPriceMonthly;
-            $vehicleQueryBuilder->where('v.price_monthly BETWEEN :minPriceMonthly AND :maxPriceMonthly')
+            $vehicleQueryBuilder->andwhere('v.price_monthly BETWEEN :minPriceMonthly AND :maxPriceMonthly')
                 ->setParameter('minPriceMonthly', $selectedMinPriceMonthly)
                 ->setParameter('maxPriceMonthly', $selectedMaxPriceMonthly);
         } else {

@@ -437,3 +437,26 @@
     color: #FFFFFF;
 }
 
+.pagination-block {
+    margin: 30px 100px;
+    text-align: center;
+}
+.pagination .page,
+.pagination .current,
+.pagination .first,
+.pagination .previous,
+.pagination .next,
+.pagination .last {
+    border-radius: 5px;
+    border-color: #18495C;
+    padding: 7px 15px;
+    background-color: #18495C;
+    color: #FFFFFF;
+    margin: 0 10px;
+    display: inline-block;
+}
+
+.pagination .current {
+    opacity: 0.7;
+}
+
