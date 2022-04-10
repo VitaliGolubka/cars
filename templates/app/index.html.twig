@@ -114,7 +114,7 @@
                     {% for key,car in pagination %}
                         {% if key == 4 %}
                             <div class="car">
-                                <img width="384" alt="Скриншот 2022-03-29 в 16 21 58"
+                                <img width="384" alt="the place for advertising"
                                      src="https://user-images.githubusercontent.com/34513693/160633732-4b9dbc32-656b-473d-86a5-4f0b26bae908.png"
                                      style="max-width: 100%;">
                             </div>
@@ -122,7 +122,7 @@
                         <div class="car">
 
                             <div class="car__picture"
-                                 style="background-image: url({{ car.pics[0] ?? '/image/clipart135547.png' }})"></div>
+                                 style="background-image: url({{ car.pics[0] ?? '/image/default-car.jpg' }})"></div>
                             <div class="car__info">
                                 <div class="car__info-left">
                                     <div class="brand">{{ car.brand }}</div>
