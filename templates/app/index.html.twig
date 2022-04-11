@@ -91,7 +91,7 @@
                         <div class="filter-title">Équipement</div>
                     </div>
                     <div>
-                        <button type="submit" class="bg-sky-600 form-button">Show</button>
+                        <button type="submit" class="bg-sky-600 form-button">Afficher</button>
                     </div>
                 </form>
             </div>
@@ -110,7 +110,7 @@
                         </select>
                     </div>
                 </div>
-                <div class="view__cars grid grid-cols-3 gap-10">
+                <div class="view__cars grid gap-10 md:grid-cols-1 lg:grid-cols-2 xlg:grid-cols-3">
                     {% for key,car in pagination %}
                         {% if key == 4 %}
                             <div class="car">
@@ -122,7 +122,7 @@
                         <div class="car">
 
                             <div class="car__picture"
-                                 style="background-image: url({{ car.pics[0] ?? '/image/default-car.jpg' }})"></div>
+                                 style="background-image: url({{ car.pics[0] ?? '/image/default-car.jpg' }}); background-size: {{ (car.pics[0] ?? false) ? 'cover' : 'contain' }}; "></div>
                             <div class="car__info">
                                 <div class="car__info-left">
                                     <div class="brand">{{ car.brand }}</div>

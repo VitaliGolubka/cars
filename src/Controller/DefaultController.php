@@ -41,9 +41,9 @@ class DefaultController extends AbstractController
         }
 
         $selectedEnergies = $request->get('energies') ?? [];
-        if ($selectedModels) {
+        if ($selectedEnergies) {
             $vehicleQueryBuilder->andWhere("v.energy IN(:energies)")
-                ->setParameter('energies', array_values($selectedModels));
+                ->setParameter('energies', array_values($selectedEnergies));
         }
 
         $maxPrice = $this->vehicleRepository->getMaxPrice();
