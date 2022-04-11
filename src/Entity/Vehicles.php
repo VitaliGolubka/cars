@@ -10,6 +10,10 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Vehicles
 {
+    const VEHICLE_BRAND = 'brand';
+    const VEHICLE_MODEL = 'model';
+    const VEHICLE_ENERGY = 'energy';
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue

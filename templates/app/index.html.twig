@@ -10,9 +10,9 @@
                     <input type="hidden" name="max-price" id="max-price">
                     <input type="hidden" id="min-price-monthly">
                     <input type="hidden" id="max-price-monthly">
-                    <input type="hidden" name="price-selected" id="price-selected" value="{{ priceSelected }}">
-                    <input type="hidden" name="sorting" id="sort" value="{{ sort }}">
-                    <input type="hidden" name="direction" id="direction" value="{{ direction }}">
+                    <input type="hidden" name="price-selected" id="price-selected" value="{{ params.priceSelected }}">
+                    <input type="hidden" name="sorting" id="sort" value="{{ params.sorting }}">
+                    <input type="hidden" name="direction" id="direction" value="{{ params.direction }}">
                     <div class="checkbox-div filter-partir">
                         <div class="checkbox-title">Prêt à partir</div>
                         <input type="checkbox" id="pret-a-partir" class="checkbox" checked>
@@ -35,42 +35,42 @@
                             <div class="filter-budget-choice-mensuel">Mensuel</div>
                         </div>
                         <div class="filter-budget-range">
-                            <div id="price-slider" data-min-price="{{ minPrice }}"
-                                 data-max-price="{{ maxPrice }}"
-                                 data-selected-min-price="{{ selectedMinPrice }}"
-                                 data-selected-max-price="{{ selectedMaxPrice }}"></div>
-                            <div id="price-monthly-slider" class="hidden" data-min-price="{{ minPriceMonthly }}"
-                                 data-max-price="{{ maxPriceMonthly }}"
-                                 data-selected-min-price="{{ selectedMinPriceMonthly }}"
-                                 data-selected-max-price="{{ selectedMaxPriceMonthly }}"></div>
+                            <div id="price-slider" data-min-price="{{ filterData.price.min }}"
+                                 data-max-price="{{ filterData.price.max }}"
+                                 data-selected-min-price="{{ params.price.min }}"
+                                 data-selected-max-price="{{ params.price.max }}"></div>
+                            <div id="price-monthly-slider" class="hidden" data-min-price="{{ filterData.priceMonthly.min }}"
+                                 data-max-price="{{ filterData.priceMonthly.max }}"
+                                 data-selected-min-price="{{ params.priceMonthly.min }}"
+                                 data-selected-max-price="{{ params.priceMonthly.max }}"></div>
                         </div>
                     </div>
                     <div class="filter-choise">
                         <div class="filter-title opened">Marque</div>
                         <div class="filter-wrapper">
-                            {% for vehicle in brands %}
+                            {% for vehicle in filterData.brands %}
                                 <input type="checkbox" name="brands[]" class="radio" id="brand-{{ vehicle.brand }}"
-                                       value="{{ vehicle.brand }}" {{ (vehicle.brand in selectedBrands) ? 'checked' : '' }}/>
+                                       value="{{ vehicle.brand }}" {{ (vehicle.brand in params.selectedBrands) ? 'checked' : '' }}/>
                                 <label for="brand-{{ vehicle.brand }}">{{ vehicle.brand }}</label> <br>
                             {% endfor %}
                         </div>
                     </div>
                     <div class="filter-choise">
-                        <div class="filter-title" data-opened="{{ selectedEnergies|length ? 1 : 0 }}">Énergie</div>
+                        <div class="filter-title" data-opened="{{ params.selectedEnergies|length ? 1 : 0 }}">Énergie</div>
                         <div class="filter-wrapper">
-                            {% for vehicle in energies %}
+                            {% for vehicle in filterData.energies %}
                                 <input type="checkbox" name="energies[]" class="radio" id="energy-{{ vehicle.energy }}"
-                                       value="{{ vehicle.energy }}" {{ (vehicle.energy in selectedEnergies) ? 'checked' : '' }}/>
+                                       value="{{ vehicle.energy }}" {{ (vehicle.energy in params.selectedEnergies) ? 'checked' : '' }}/>
                                 <label for="energy-{{ vehicle.energy }}">{{ vehicle.energy }}</label> <br>
                             {% endfor %}
                         </div>
                     </div>
                     <div class="filter-choise">
-                        <div class="filter-title" data-opened="{{ selectedModels|length ? 1 : 0 }}">Modèle</div>
+                        <div class="filter-title" data-opened="{{ params.selectedModels|length ? 1 : 0 }}">Modèle</div>
                         <div class="filter-wrapper">
-                            {% for vehicle in models %}
+                            {% for vehicle in filterData.models %}
                                 <input type="checkbox" name="models[]" class="radio" id="model-{{ vehicle.model }}"
-                                       value="{{ vehicle.model }}" {{ (vehicle.model in selectedModels) ? 'checked' : '' }}/>
+                                       value="{{ vehicle.model }}" {{ (vehicle.model in params.selectedModels) ? 'checked' : '' }}/>
                                 <label for="model-{{ vehicle.model }}">{{ vehicle.model }}</label> <br>
                             {% endfor %}
                         </div>

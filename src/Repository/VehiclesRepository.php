@@ -6,6 +6,7 @@ use App\Entity\Vehicles;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -48,62 +49,74 @@ class VehiclesRepository extends ServiceEntityRepository
     /**
      * @return Vehicles[] Returns an array of Vehicles objects
      */
-    public function getModels()
+    public function getDictionary($field): array
     {
         return $this->createQueryBuilder('v')
-            ->select('v.model')
+            ->select('v.' . $field)
             ->distinct()
             ->getQuery()
             ->getResult();
     }
 
-    public function getBrands()
+    /**
+     * @return float|int|mixed|string
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function getMax($field)
     {
         return $this->createQueryBuilder('v')
-            ->select('v.brand')
-            ->distinct()
-            ->getQuery()
-            ->getResult();
-    }
-
-    public function getEnergy()
-    {
-        return $this->createQueryBuilder('v')
-            ->select('v.energy')
-            ->distinct()
-            ->getQuery()
-            ->getResult();
-    }
-
-    public function getMaxPrice()
-    {
-        return $this->createQueryBuilder('v')
-            ->select('MAX(v.price)')
+            ->select('MAX(v.' . $field . ')')
             ->getQuery()
             ->getSingleScalarResult();
     }
 
-    public function getMinPrice()
+    /**
+     * @return float|int|mixed|string
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function getMin(string $field)
     {
         return $this->createQueryBuilder('v')
-            ->select('MIN(v.price)')
+            ->select('MIN(v.' . $field . ')')
             ->getQuery()
             ->getSingleScalarResult();
     }
 
-    public function getMaxPriceMonthly()
+    public function getQueryBuilderForPagination(array $params): QueryBuilder
     {
-        return $this->createQueryBuilder('v')
-            ->select('MAX(v.price_monthly)')
-            ->getQuery()
-            ->getSingleScalarResult();
-    }
+        $query = $this->createQueryBuilder('v');
 
-    public function getMinPriceMonthly()
-    {
-        return $this->createQueryBuilder('v')
-            ->select('MIN(v.price_monthly)')
-            ->getQuery()
-            ->getSingleScalarResult();
+        if ($params['selectedBrands']) {
+            $query->andWhere("v.brand IN(:brands)")
+                ->setParameter('brands', array_values($params['selectedBrands']));
+        }
+
+        if ($params['selectedModels']) {
+            $query->andWhere("v.model IN(:models)")
+                ->setParameter('models', array_values($params['selectedModels']));
+        }
+
+        if ($params['selectedEnergies']) {
+            $query->andWhere("v.energy IN(:energies)")
+                ->setParameter('energies', array_values($params['selectedEnergies']));
+        }
+
+        if ($params['price']['min']) {
+            $query->andwhere('v.price BETWEEN :minPrice AND :maxPrice')
+                ->setParameter('minPrice', (int)$params['price']['min'])
+                ->setParameter('maxPrice', (int)$params['price']['max']);
+        }
+
+        if ($params['priceMonthly']['min']) {
+            $query->andwhere('v.price_monthly BETWEEN :minPriceMonthly AND :maxPriceMonthly')
+                ->setParameter('minPriceMonthly', (int)$params['priceMonthly']['min'])
+                ->setParameter('maxPriceMonthly', (int)$params['priceMonthly']['max']);
+        }
+
+        $query->orderBy('v.' . $params['sorting'], $params['direction']);
+
+        return $query;
     }
 }

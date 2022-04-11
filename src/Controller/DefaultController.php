@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Vehicles;
 use App\Repository\VehiclesRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Knp\Component\Pager\PaginatorInterface;
@@ -26,91 +27,60 @@ class DefaultController extends AbstractController
      */
     public function appDefaultAction(Request $request): Response
     {
-        $vehicleQueryBuilder = $this->vehicleRepository->createQueryBuilder('v');
-
-        $selectedBrands = $request->get('brands') ?? [];
-        if ($selectedBrands) {
-            $vehicleQueryBuilder->andWhere("v.brand IN(:brands)")
-                ->setParameter('brands', array_values($selectedBrands));
-        }
-
-        $selectedModels = $request->get('models') ?? [];
-        if ($selectedModels) {
-            $vehicleQueryBuilder->andWhere("v.model IN(:models)")
-                ->setParameter('models', array_values($selectedModels));
-        }
-
-        $selectedEnergies = $request->get('energies') ?? [];
-        if ($selectedEnergies) {
-            $vehicleQueryBuilder->andWhere("v.energy IN(:energies)")
-                ->setParameter('energies', array_values($selectedEnergies));
-        }
-
-        $maxPrice = $this->vehicleRepository->getMaxPrice();
-        $minPrice = $this->vehicleRepository->getMinPrice();
-        $selectedMinPrice = $request->get('min-price');
-        $selectedMaxPrice = $request->get('max-price');
-        if ($selectedMinPrice) {
-            $selectedMinPrice = (int)$selectedMinPrice;
-            $selectedMaxPrice = (int)$selectedMaxPrice;
-            $vehicleQueryBuilder->andwhere('v.price BETWEEN :minPrice AND :maxPrice')
-                ->setParameter('minPrice', $selectedMinPrice)
-                ->setParameter('maxPrice', $selectedMaxPrice);
-        } else {
-            $selectedMinPrice = $minPrice;
-            $selectedMaxPrice = $maxPrice;
-        }
-
-        $maxPriceMonthly = $this->vehicleRepository->getMaxPriceMonthly();
-        $minPriceMonthly = $this->vehicleRepository->getMinPriceMonthly();
-        $selectedMinPriceMonthly = $request->get('min-price-monthly');
-        $selectedMaxPriceMonthly = $request->get('max-price-monthly');
-        if ($selectedMinPriceMonthly) {
-            $selectedMinPriceMonthly = (int)$selectedMinPriceMonthly;
-            $selectedMaxPriceMonthly = (int)$selectedMaxPriceMonthly;
-            $vehicleQueryBuilder->andwhere('v.price_monthly BETWEEN :minPriceMonthly AND :maxPriceMonthly')
-                ->setParameter('minPriceMonthly', $selectedMinPriceMonthly)
-                ->setParameter('maxPriceMonthly', $selectedMaxPriceMonthly);
-        } else {
-            $selectedMinPriceMonthly = $minPriceMonthly;
-            $selectedMaxPriceMonthly = $maxPriceMonthly;
-        }
-
-        $sort = $request->get('sorting') ?? 'id';
-        $direction = $request->get('direction') ?? 'desc';
-        $vehicleQueryBuilder->orderBy('v.' . $sort, $direction);
+        $params = $this->getParamsForQuery($request);
 
         $pagination = $this->paginator->paginate(
-            $vehicleQueryBuilder,
-            $request->query->getInt('page', 1),
+            $this->vehicleRepository->getQueryBuilderForPagination($params),
+            $params['page'],
             11
         );
 
-        $models = $this->vehicleRepository->getModels();
-        $brands = $this->vehicleRepository->getBrands();
-        $energies = $this->vehicleRepository->getEnergy();
+        $filterData = $this->getDataForFilter();
 
-        $priceSelected = $request->get('price-selected') ?? 1;
+        return $this->render('app/index.html.twig', compact('filterData', 'pagination', 'params'));
+    }
 
-        return $this->render('app/index.html.twig', [
-            'pagination' => $pagination,
-            'models' => $models,
-            'selectedModels' => $selectedModels,
-            'brands' => $brands,
-            'selectedBrands' => $selectedBrands,
-            'energies' => $energies,
-            'selectedEnergies' => $selectedEnergies,
-            'maxPrice' => $maxPrice,
-            'minPrice' => $minPrice,
-            'selectedMinPrice' => $selectedMinPrice,
-            'selectedMaxPrice' => $selectedMaxPrice,
-            'maxPriceMonthly' => $maxPriceMonthly,
-            'minPriceMonthly' => $minPriceMonthly,
-            'selectedMinPriceMonthly' => $selectedMinPriceMonthly,
-            'selectedMaxPriceMonthly' => $selectedMaxPriceMonthly,
-            'priceSelected' => $priceSelected,
-            'sort' => $sort,
-            'direction' => $direction,
-        ]);
+    /**
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     */
+    public function getDataForFilter(): array
+    {
+        return [
+            'price' => [
+                'min' => $this->vehicleRepository->getMin('price'),
+                'max' => $this->vehicleRepository->getMax('price'),
+            ],
+            'priceMonthly' => [
+                'min' => $this->vehicleRepository->getMin('price_monthly'),
+                'max' => $this->vehicleRepository->getMax('price_monthly'),
+            ],
+            'models' => $this->vehicleRepository->getDictionary(Vehicles::VEHICLE_MODEL),
+            'brands' => $this->vehicleRepository->getDictionary(Vehicles::VEHICLE_BRAND),
+            'energies' => $this->vehicleRepository->getDictionary(Vehicles::VEHICLE_ENERGY),
+        ];
+    }
+
+    public function getParamsForQuery(Request $request): array
+    {
+        $price = $request->get('price');
+        $priceMonthly = $request->get('price-monthly');
+        return [
+            'selectedBrands' => is_array($request->get('brands')) ? $request->get('brands', []) : [],
+            'selectedModels' => is_array($request->get('models')) ? $request->get('models') : [],
+            'selectedEnergies' => is_array($request->get('energies')) ? $request->get('energies') : [],
+            'priceSelected' => is_string($request->get('selected')) ? (int)$request->get('energies') : 1,
+            'price' => [
+                'min' => is_array($price) && isset($price['min']) && is_string($price['min']) ? $price['min'] : '',
+                'max' => is_array($price) && isset($price['max']) && is_string($price['max']) ? $price['max'] : '',
+            ],
+            'priceMonthly' => [
+                'min' => is_array($priceMonthly) && isset($priceMonthly['min']) && is_string($priceMonthly['min']) ? $priceMonthly['min'] : '',
+                'max' => is_array($priceMonthly) && isset($priceMonthly['max']) && is_string($priceMonthly['max']) ? $priceMonthly['max'] : '',
+            ],
+            'sorting' => is_string($request->get('sorting')) ? $request->get('sorting') : 'id',
+            'direction' => is_string($request->get('direction')) ? $request->get('direction') : 'desc',
+            'page' => is_string($request->get('page')) ? (int)$request->get('direction') : 1,
+        ];
     }
 }
